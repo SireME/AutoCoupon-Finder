@@ -1,7 +1,7 @@
 AutoCoupon Finder
 =================
 
-&lt;!\-\- Ensure you have an icon.png for the project image --&gt;
+&lt;!\-\- Ensure icon.png for project image --&gt;
 
 Description
 -----------
@@ -27,17 +27,18 @@ To install the **AutoCoupon Finder** extension, follow these steps:
     
     bash
     
-    Copy code
+
     
-    `git clone https://github.com/yourusername/auto-coupon-finder.git cd auto-coupon-finder`
+    `git clone git@github.com:SireME/AutoCoupon-Finder.git`
     
-2.  **Open Chrome Extensions Page**:
+    
+3.  **Open Chrome Extensions Page**:
     * Open Google Chrome and go to `chrome://extensions/`.
-3.  **Enable Developer Mode**:
+4.  **Enable Developer Mode**:
     * Toggle the "Developer mode" switch in the top right corner.
-4.  **Load Unpacked Extension**:
+5.  **Load Unpacked Extension**:
     * Click on the "Load unpacked" button and select the folder where the extension files are located.
-5.  **Test the Extension**:
+6.  **Test the Extension**:
     * Navigate to any e-commerce website and see the extension in action!
 
 Usage
@@ -67,8 +68,7 @@ Contributions to **AutoCoupon Finder** are welcome! To contribute, please follow
 2.  **Create a New Branch**: Create a branch for your feature or bug fix.
     
     bash
-    
-    Copy code
+
     
     `git checkout -b feature/your-feature-name`
     
@@ -76,16 +76,14 @@ Contributions to **AutoCoupon Finder** are welcome! To contribute, please follow
 4.  **Commit Your Changes**: Commit your changes with a clear message.
     
     bash
-    
-    Copy code
+   
     
     `git commit -m "Add new feature or fix bug"`
     
 5.  **Push to Your Fork**: Push your changes to your forked repository.
     
     bash
-    
-    Copy code
+   
     
     `git push origin feature/your-feature-name`
     
@@ -99,7 +97,7 @@ This project is licensed under the MIT License. See the LICENSE file for more in
 Contact
 -------
 
-For any questions or suggestions regarding the **AutoCoupon Finder**, feel free to open an issue or contact the author at \[your-email@example.com\].
+For any questions or suggestions regarding the **AutoCoupon Finder**, feel free to open an issue or contact the author at \[mbangernest0@gmail.com\].
 
 * * *
 
