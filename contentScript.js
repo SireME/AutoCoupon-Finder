@@ -2,7 +2,8 @@
  * This script checks if the current webpage is an ecommerce site and sends a message to the background script to fetch coupons.
  * It uses keywords associated with ecommerce sites to determine if coupon searching should be initiated.
  */
-const isEcommerceSite = () => {
+alert("This is a test run");
+function isEcommerceSite() {
     /**
      * Check if the page contains keywords associated with ecommerce sites
      * @returns {boolean} True if the page appears to be an ecommerce site, false otherwise

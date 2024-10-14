@@ -12,15 +12,21 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
      */
 
     // test
-    alert("tab succesfully changed")
+    console.log(`tab succesfully changed with ID: ${tabId}`);
 
 
-    if (changeInfo.status === 'complete') {
+    if (changeInfo.status === 'complete' && tab.url) {
       /**
        * Execute the content script to start searching for coupons on the current webpage
        * @param {object} target - Target details for executing the script
        * @param {string[]} files - Array of file paths to execute
        */
+    // Ignore chrome:// URLs
+    if (tab.url.startsWith("chrome://")) {
+    console.log("Ignoring chrome:// URL");
+    return;
+    }
+
       chrome.scripting.executeScript({
         target: {tabId: tab.id},
         files: ['contentScript.js']
