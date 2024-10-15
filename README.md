@@ -58,6 +58,7 @@ Technologies Used
 * **JavaScript**: For scripting the extension's logic.
 * **HTML/CSS**: For creating the user interface of the popup.
 * **Chrome APIs**: For interacting with the browser and fetching data.
+* **AI: LLama 3 using groq API**: For structuring web data extracted from the internet.
 
 Contributing
 ------------
