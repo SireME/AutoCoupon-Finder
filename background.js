@@ -33,3 +33,42 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       });
     }
   });
+
+
+  // Listen for messages from content scripts
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "fetchCoupons") {
+    console.log("Received request to fetch coupons from:", sender.tab.url);
+
+    // Simulated coupon fetching process (you can replace this with an actual API call)
+    fetchCoupons()
+      .then(coupons => {
+        console.log("Coupons fetched successfully:", coupons);
+        // Send the fetched coupons back as the response
+        sendResponse({ success: true, coupons: coupons });
+      })
+      .catch(error => {
+        console.error("Error fetching coupons:", error);
+        sendResponse({ success: false, error: error.message });
+      });
+
+    // Return true to indicate that we will send a response asynchronously
+    return true; 
+  }
+});
+
+// Example function to simulate fetching coupons from an API
+async function fetchCoupons() {
+  // Here, you could make an actual API call using fetch or XMLHttpRequest
+  // For demonstration purposes, we return a static array of coupons
+  return new Promise((resolve, reject) => {
+    // Simulate a network request delay
+    setTimeout(() => {
+      const coupons = [
+        { code: "SAVE10", description: "Save 10% on your next purchase" },
+        { code: "FREESHIP", description: "Free shipping on orders over $50" },
+      ];
+      resolve(coupons);
+    }, 2000); // Simulate 2 seconds delay
+  });
+}
