@@ -161,28 +161,28 @@ if (window.top === window.self) {
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "parseSearchResults") {
-        console.log(`what is to be parsedresults:  ${request.html}`);
-        const coupons = extractDuckDuckGoResults(request.html);
-        console.log(`where we parse search results in contenscript results:  ${coupons}`);
+        //console.log(`what is to be parsedresults:  ${request.html}`);
+        const coupons = extractGoogleResults(request.html);
+        console.log(`where we parse search results in contenscript results:\n  ${coupons}`);
         sendResponse({ success: true, coupons: coupons });
     }
   });
   
-  // Extract text from DuckDuckGo results
-  function extractDuckDuckGoResults(html) {
+// Extract text from Google results
+function extractGoogleResults(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-  
+
     const searchResults = [];
-    const elements = doc.querySelectorAll('div.result__body');
-  
+    const elements = doc.querySelectorAll('div.g'); // Select Google search result elements
+
     elements.forEach(element => {
-        const snippet = element.innerText;
+        const snippet = element.innerText; // Get the inner text of each result
         if (snippet) {
-            searchResults.push(snippet);
+            searchResults.push(snippet); // Add the snippet to the results array
         }
     });
-  
+
     return searchResults; // Return an array of snippets
-  }
-  
+}
+

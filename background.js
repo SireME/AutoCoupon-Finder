@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "fetchCoupons") {
       console.log("Received request to fetch coupons from:", sender.tab.url);
 
-      fetchCouponsFromSearch(sender.tab.url)  // Make sure to send the query in the request
+      fetchCouponsFromGoogle(sender.tab.url)  // Fetch coupons from Google Search
           .then(coupons => {
               console.log("Coupons fetched successfully:", coupons);
               sendResponse({ success: true, coupons: coupons });
@@ -33,9 +33,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Step 2: Function to perform DuckDuckGo search
-async function performDuckDuckGoSearch(query) {
-  const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&kl=us-en`;
+// Step 2: Function to perform Google Search
+async function performGoogleSearch(query) {
+  const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 
   try {
       const response = await fetch(searchUrl, {
@@ -50,22 +50,22 @@ async function performDuckDuckGoSearch(query) {
           const html = await response.text();
           return html;
       } else {
-          console.error("Error fetching search results:", response.statusText);
+          console.error("Error fetching Google search results:", response.statusText);
           return '';
       }
   } catch (error) {
-      console.error("Error performing DuckDuckGo search:", error);
+      console.error("Error performing Google search:", error);
       return '';
   }
 }
 
-// Step 3: Extract text from DuckDuckGo results
-function extractDuckDuckGoResults(html) {
+// Step 3: Extract text from Google search results
+function extractGoogleResults(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
   const searchResults = [];
-  const elements = doc.querySelectorAll('div.result__body');
+  const elements = doc.querySelectorAll('div.BNeawe.s3v9rd.AP7Wnd'); // Adjust the selector to match Google's search result format
 
   elements.forEach(element => {
       const snippet = element.innerText;
@@ -77,62 +77,38 @@ function extractDuckDuckGoResults(html) {
   return searchResults.join(' '); // Return combined snippets as a single text
 }
 
-// // Step 4: Fetch coupons from search query
-// async function fetchCouponsFromSearch(url) {
-//   try {
-//       const searchHtml = await performDuckDuckGoSearch(`coupons for site: ${url}`);
-
-//       if (!searchHtml) {
-//           console.error("No search results found");
-//           return [];
-//       }
-
-//       const searchText = extractDuckDuckGoResults(searchHtml);
-//       console.log("Search text extracted:", searchText);
-
-//       // Step 5: Send extracted text to Groq API for coupon extraction
-//       const coupons = await sendToGroqAPI(searchText);
-//       return coupons.length ? coupons : []; // Return structured coupons or empty array
-//   } catch (error) {
-//       console.error("Error in coupon fetching process:", error);
-//       return [];
-//   }
-// }
-
-
 // Step 4: Fetch coupons from search query
-async function fetchCouponsFromSearch(url) {
+async function fetchCouponsFromGoogle(url) {
   try {
-      const searchHtml = await performDuckDuckGoSearch(`coupons for site: ${url}`);
-
+      const searchHtml = await performGoogleSearch(`coupons for site: ${url}`);
+      //console.log(searchHtml);
       if (!searchHtml) {
           console.error("No search results found");
           return [];
       }
 
       // Send the search HTML to the content script for parsing
-       // Step 2: Create a Promise to handle the asynchronous response from the content script
-       const searchText = await new Promise((resolve) => {
+      const searchText = await new Promise((resolve) => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs[0]) {
                 chrome.tabs.sendMessage(tabs[0].id, { action: "parseSearchResults", html: searchHtml }, (response) => {
                     if (response && response.success) {
-                        // Resolve the promise with the coupons received from the content script
-                        resolve(response.coupons);
+                        resolve(response.coupons); // Resolve with the parsed coupons
                     } else {
-                        resolve([]); // Resolve with empty if the response is not successful
+                        resolve([]); // Resolve with an empty array if no coupons are found
                     }
                 });
             } else {
-                resolve([]); // Resolve with empty if no tabs found
+                resolve([]); // Resolve with an empty array if no tabs are found
             }
         });
     });
       
-     console.log(`extraction from contentscript: ${searchHtml.coupons}`);
-      // Step 5: Send extracted text to Groq API for coupon extraction
-      const coupons = await sendToGroqAPI(searchText.coupons);
-      return coupons.length ? coupons : []; // Return structured coupons or empty array
+    console.log(`Extraction from content script:\n ${searchText}`);
+      
+    // Step 5: Send extracted text to Groq API for coupon extraction
+    const coupons = await sendToGroqAPI(searchText);
+    return coupons.length ? coupons : []; // Return structured coupons or empty array
 
   } catch (error) {
       console.error("Error in coupon fetching process:", error);
@@ -140,24 +116,13 @@ async function fetchCouponsFromSearch(url) {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
 // Step 6: Function to send extracted text to Groq API
 async function sendToGroqAPI(text) {
   const response = await fetch('https://api.groq.com/chat/completions', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${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}` // Ensure the API key is secure
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}` // Securely fetch the API key
       },
       body: JSON.stringify({
           messages: [{
