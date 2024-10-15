@@ -116,18 +116,26 @@ async function fetchCouponsFromGoogle(url) {
   }
 }
 
+
+
 // Step 6: Function to send extracted text to Groq API
 async function sendToGroqAPI(text) {
-  const response = await fetch('https://api.groq.com/chat/completions', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}` // Securely fetch the API key
-      },
-      body: JSON.stringify({
-          messages: [{
-              role: "user",
-              content: `
+const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${"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"}`
+    },
+    body: JSON.stringify({
+        messages: [
+            {
+                role: 'system',
+                content:
+                    'You are a helpful assistant in the areas of web scrapping. Please only return valid JSON and no other text.'
+            },
+            {
+                role: 'user',
+                content: `
                   Extract all coupon codes from the following text. 
                   Each coupon code is a string, typically consisting of uppercase letters and numbers. 
                   Please return the result as a JSON array of objects, where each object contains:
@@ -152,16 +160,23 @@ async function sendToGroqAPI(text) {
                       }
                   ]
               `
-          }],
-          model: "llama3-8b-8192"
-      })
-  });
+            }
+        ],
+        model: 'llama3-8b-8192',
+        temperature: 1,
+        // max_tokens: 1024,
+        top_p: 1,
+        stream: false,
+        stop: null
+    })
+});
 
-  if (response.ok) {
-      const jsonResponse = await response.json();
-      return jsonResponse.choices.map(choice => choice.message.content); // Extract coupon codes
-  } else {
-      console.error("Error fetching from Groq API:", response.statusText);
-      return [];
-  }
+if (response.ok) {
+    const data = await response.json();
+    console.log(data.choices[0].message?.content, '<---- groq.com api');
+
+    return JSON.parse(data.choices[0].message?.content);
+} else {
+    console.error(await response.json());
+}
 }
