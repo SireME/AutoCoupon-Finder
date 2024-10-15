@@ -78,9 +78,9 @@ function extractDuckDuckGoResults(html) {
 }
 
 // Step 4: Fetch coupons from search query
-async function fetchCouponsFromSearch(query) {
+async function fetchCouponsFromSearch(url) {
   try {
-      const searchHtml = await performDuckDuckGoSearch(query);
+      const searchHtml = await performDuckDuckGoSearch(`coupons for site: ${url}`);
 
       if (!searchHtml) {
           console.error("No search results found");
@@ -105,7 +105,7 @@ async function sendToGroqAPI(text) {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}` // Ensure the API key is secure
+          'Authorization': `Bearer ${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}` // Ensure the API key is secure
       },
       body: JSON.stringify({
           messages: [{
