@@ -204,7 +204,7 @@ function displayCouponNotification(coupons) {
             const table = document.createElement("table");
             const headerRow = document.createElement("tr");
             const headerCell1 = document.createElement("th");
-            headerCell1.textContent = "Coupon Code";
+            headerCell1.textContent = "Coupon Code  ";
             const headerCell2 = document.createElement("th");
             headerCell2.textContent = "Description";
 
@@ -216,7 +216,7 @@ function displayCouponNotification(coupons) {
             coupons.forEach(coupon => {
                 const row = document.createElement("tr");
                 const couponCell = document.createElement("td");
-                couponCell.textContent = coupon.coupon; // Access coupon code
+                couponCell.textContent = coupon.code; // Access coupon code
                 const descriptionCell = document.createElement("td");
                 descriptionCell.textContent = coupon.description; // Access description
 
