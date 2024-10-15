@@ -1,20 +1,19 @@
 //this condition ensures the content script runs only in the top iframe window
 if (window.top === window.self) {
-    
-// this conditional ensures the content script runs only once
-if (!window.contentScriptLoaded) {
+  // this conditional ensures the content script runs only once
+  if (!window.contentScriptLoaded) {
     window.contentScriptLoaded = true;
 
-// Initial test alert to confirm the content script has been loaded (optional)
-alert("This is a test run");
+    // Initial test alert to confirm the content script has been loaded (optional)
+    alert("This is a test run");
 
-// Function to check if the current webpage is an ecommerce site
-function isEcommerceSite() {
-    /**
-     * Check if the page contains keywords associated with ecommerce sites
-     * @returns {boolean} True if the page appears to be an ecommerce site, false otherwise
-     */
-    const keywords = [
+    // Function to check if the current webpage is an ecommerce site
+    function isEcommerceSite() {
+      /**
+       * Check if the page contains keywords associated with ecommerce sites
+       * @returns {boolean} True if the page appears to be an ecommerce site, false otherwise
+       */
+      const keywords = [
         //common
         "checkout", "add to cart", "buy now", "subscribe",
 
@@ -90,64 +89,71 @@ function isEcommerceSite() {
         "summer clearance", "summer specials", "back to school", 
         "back to school sale", "back to school deals"
     ];
-    
-    
-    // Check if the body text or clickable elements contain any ecommerce-related keywords
-    const keywordFound = keywords.some(keyword => 
-        document.body.innerText.toLowerCase().includes(keyword) || 
-        Array.from(document.querySelectorAll("button, a")).some(el => el.textContent.toLowerCase().includes(keyword))
-    );
-    
-    return keywordFound;
-}
 
-// Function to handle the coupon fetching process
-function initiateCouponSearch() {
-    try {
-        if (isEcommerceSite()) {
-            console.log("Ecommerce site detected, sending message to background script to fetch coupons");
+      // Check if the body text or clickable elements contain any ecommerce-related keywords
+      const keywordFound = keywords.some(
+        (keyword) =>
+          document.body.innerText.toLowerCase().includes(keyword) ||
+          Array.from(document.querySelectorAll("button, a")).some((el) =>
+            el.textContent.toLowerCase().includes(keyword)
+          )
+      );
 
-            // Send a message to the background script to initiate coupon search
-            chrome.runtime.sendMessage({ action: 'fetchCoupons' }, (response) => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error sending message:", chrome.runtime.lastError.message);
-                } else {
-                    console.log("Message sent successfully", response);
-                }
-            });
-        } else {
-            console.log("Not an ecommerce site, no action taken.");
-        }
-    } catch (error) {
-        console.error("An error occurred while checking the ecommerce site:", error);
+      return keywordFound;
     }
-}
 
-// Handle pages where content is loaded dynamically (e.g., AJAX)
-function observeForDynamicChanges() {
-    const observer = new MutationObserver(() => {
+    // Function to handle the coupon fetching process
+    function initiateCouponSearch() {
+      try {
         if (isEcommerceSite()) {
-            // Stop observing once we detect an ecommerce site
-            observer.disconnect();
-            initiateCouponSearch();
+          console.log(
+            "Ecommerce site detected, sending message to background script to fetch coupons"
+          );
+
+          // Send a message to the background script to initiate coupon search
+          chrome.runtime.sendMessage({ action: "fetchCoupons" }, (response) => {
+            if (chrome.runtime.lastError) {
+              console.error(
+                "Error sending message:",
+                chrome.runtime.lastError.message
+              );
+            } else {
+              console.log("Message sent successfully", response);
+            }
+          });
+        } else {
+          console.log("Not an ecommerce site, no action taken.");
         }
-    });
+      } catch (error) {
+        console.error(
+          "An error occurred while checking the ecommerce site:",
+          error
+        );
+      }
+    }
 
-    // Observe the entire body for changes in child elements (useful for dynamically loaded content)
-    observer.observe(document.body, { childList: true, subtree: true });
+    // Handle pages where content is loaded dynamically (e.g., AJAX)
+    function observeForDynamicChanges() {
+      const observer = new MutationObserver(() => {
+        if (isEcommerceSite()) {
+          // Stop observing once we detect an ecommerce site
+          observer.disconnect();
+          initiateCouponSearch();
+        }
+      });
 
-    // Also run the check immediately in case the page is already loaded
-    initiateCouponSearch();
+      // Observe the entire body for changes in child elements (useful for dynamically loaded content)
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // Also run the check immediately in case the page is already loaded
+      initiateCouponSearch();
+    }
+
+    // Start observing for changes on the webpage
+    observeForDynamicChanges();
+
+    console.log("Content script running only once");
+  }
+
+  console.log("Content script running in top window");
 }
-
-// Start observing for changes on the webpage
-observeForDynamicChanges();
-
-
-   console.log("Content script running only once");
-}
-
-
-console.log("Content script running in top window");
-}
-
