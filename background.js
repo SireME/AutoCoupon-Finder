@@ -72,3 +72,30 @@ async function fetchCoupons() {
     }, 2000); // Simulate 2 seconds delay
   });
 }
+
+
+//function to perform duckduckgo search and return results for processing
+async function performDuckDuckGoSearch(query) {
+  const searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&kl=us-en`; // Forces English search results
+
+  try {
+    const response = await fetch(searchUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'text/html',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' // A typical user agent
+      }
+    });
+
+    if (response.ok) {
+      const html = await response.text();
+      return html; // Return the raw HTML
+    } else {
+      console.error("Error fetching search results:", response.statusText);
+      return ''; // Return an empty string on failure
+    }
+  } catch (error) {
+    console.error("Error performing DuckDuckGo search:", error);
+    return ''; // Return empty string if there's an error
+  }
+}
