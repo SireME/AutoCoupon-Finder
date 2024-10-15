@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "fetchCoupons") {
       console.log("Received request to fetch coupons from:", sender.tab.url);
 
-      fetchCouponsFromSearch(request.query)  // Make sure to send the query in the request
+      fetchCouponsFromSearch(sender.tab.url)  // Make sure to send the query in the request
           .then(coupons => {
               console.log("Coupons fetched successfully:", coupons);
               sendResponse({ success: true, coupons: coupons });
@@ -77,6 +77,29 @@ function extractDuckDuckGoResults(html) {
   return searchResults.join(' '); // Return combined snippets as a single text
 }
 
+// // Step 4: Fetch coupons from search query
+// async function fetchCouponsFromSearch(url) {
+//   try {
+//       const searchHtml = await performDuckDuckGoSearch(`coupons for site: ${url}`);
+
+//       if (!searchHtml) {
+//           console.error("No search results found");
+//           return [];
+//       }
+
+//       const searchText = extractDuckDuckGoResults(searchHtml);
+//       console.log("Search text extracted:", searchText);
+
+//       // Step 5: Send extracted text to Groq API for coupon extraction
+//       const coupons = await sendToGroqAPI(searchText);
+//       return coupons.length ? coupons : []; // Return structured coupons or empty array
+//   } catch (error) {
+//       console.error("Error in coupon fetching process:", error);
+//       return [];
+//   }
+// }
+
+
 // Step 4: Fetch coupons from search query
 async function fetchCouponsFromSearch(url) {
   try {
@@ -87,17 +110,46 @@ async function fetchCouponsFromSearch(url) {
           return [];
       }
 
-      const searchText = extractDuckDuckGoResults(searchHtml);
-      console.log("Search text extracted:", searchText);
-
+      // Send the search HTML to the content script for parsing
+       // Step 2: Create a Promise to handle the asynchronous response from the content script
+       const searchText = await new Promise((resolve) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, { action: "parseSearchResults", html: searchHtml }, (response) => {
+                    if (response && response.success) {
+                        // Resolve the promise with the coupons received from the content script
+                        resolve(response.coupons);
+                    } else {
+                        resolve([]); // Resolve with empty if the response is not successful
+                    }
+                });
+            } else {
+                resolve([]); // Resolve with empty if no tabs found
+            }
+        });
+    });
+      
+     console.log(`extraction from contentscript: ${searchHtml.coupons}`);
       // Step 5: Send extracted text to Groq API for coupon extraction
-      const coupons = await sendToGroqAPI(searchText);
+      const coupons = await sendToGroqAPI(searchText.coupons);
       return coupons.length ? coupons : []; // Return structured coupons or empty array
+
   } catch (error) {
       console.error("Error in coupon fetching process:", error);
       return [];
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 // Step 6: Function to send extracted text to Groq API
 async function sendToGroqAPI(text) {

@@ -157,3 +157,32 @@ if (window.top === window.self) {
 
   console.log("Content script running in top window");
 }
+
+// Listen for messages from the background script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "parseSearchResults") {
+        console.log(`what is to be parsedresults:  ${request.html}`);
+        const coupons = extractDuckDuckGoResults(request.html);
+        console.log(`where we parse search results in contenscript results:  ${coupons}`);
+        sendResponse({ success: true, coupons: coupons });
+    }
+  });
+  
+  // Extract text from DuckDuckGo results
+  function extractDuckDuckGoResults(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+  
+    const searchResults = [];
+    const elements = doc.querySelectorAll('div.result__body');
+  
+    elements.forEach(element => {
+        const snippet = element.innerText;
+        if (snippet) {
+            searchResults.push(snippet);
+        }
+    });
+  
+    return searchResults; // Return an array of snippets
+  }
+  
