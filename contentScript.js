@@ -117,7 +117,11 @@ if (window.top === window.self) {
                 "Error sending message:",
                 chrome.runtime.lastError.message
               );
-            } else if (response && response.success && Array.isArray(response.coupons)){
+            } else if (
+              response &&
+              response.success &&
+              Array.isArray(response.coupons)
+            ) {
               console.log("Message sent successfully", response);
               displayCouponNotification(response.coupons);
             }
@@ -159,113 +163,109 @@ if (window.top === window.self) {
   console.log("Content script running in top window");
 }
 
-
-
 // Function to display the notification for detected coupons
 function displayCouponNotification(coupons) {
-    // Create notification element
-    const notification = document.createElement("div");
-    notification.style.position = "fixed";
-    notification.style.bottom = "20px";
-    notification.style.left = "20px";
-    notification.style.backgroundColor = "#4CAF50"; // Green background
-    notification.style.color = "white";
-    notification.style.padding = "10px";
-    notification.style.borderRadius = "5px";
-    notification.style.zIndex = "9999";
-    notification.style.cursor = "pointer";
-    notification.innerText = "COUPONS DETECTED! CLICK TO SEE COUPONS";
-    
-    // Append to body
-    document.body.appendChild(notification);
+  // Create notification element
+  const notification = document.createElement("div");
+  notification.style.position = "fixed";
+  notification.style.bottom = "20px";
+  notification.style.left = "20px";
+  notification.style.backgroundColor = "#4CAF50"; // Green background
+  notification.style.color = "white";
+  notification.style.padding = "10px";
+  notification.style.borderRadius = "5px";
+  notification.style.zIndex = "9999";
+  notification.style.cursor = "pointer";
+  notification.innerText = "COUPONS DETECTED! CLICK TO SEE COUPONS";
 
-    // On click, create the coupon table
-    notification.onclick = function () {
-        createCouponTable(coupons);
-        document.body.removeChild(notification); // Remove notification after click
-    };
+  // Append to body
+  document.body.appendChild(notification);
+
+  // On click, create the coupon table
+  notification.onclick = function () {
+    createCouponTable(coupons);
+    document.body.removeChild(notification); // Remove notification after click
+  };
 }
 
-        // Function to create and display the coupon table
-        function createCouponTable(coupons) {
-            const couponTable = document.createElement("div");
-            couponTable.style.position = "fixed";
-            couponTable.style.bottom = "60px"; // Adjusted to show above the notification
-            couponTable.style.left = "20px";
-            couponTable.style.backgroundColor = "#fff";
-            couponTable.style.border = "1px solid #ccc";
-            couponTable.style.borderRadius = "5px";
-            couponTable.style.padding = "10px";
-            couponTable.style.zIndex = "9999";
-            couponTable.style.maxHeight = "300px"; // Limit height
-            couponTable.style.overflowY = "auto"; // Add scroll if needed
+// Function to create and display the coupon table
+function createCouponTable(coupons) {
+  const couponTable = document.createElement("div");
+  couponTable.style.position = "fixed";
+  couponTable.style.bottom = "60px"; // Adjusted to show above the notification
+  couponTable.style.left = "20px";
+  couponTable.style.backgroundColor = "#fff";
+  couponTable.style.border = "1px solid #ccc";
+  couponTable.style.borderRadius = "5px";
+  couponTable.style.padding = "10px";
+  couponTable.style.zIndex = "9999";
+  couponTable.style.maxHeight = "300px"; // Limit height
+  couponTable.style.overflowY = "auto"; // Add scroll if needed
 
-            // Create table element
-            const table = document.createElement("table");
-            const headerRow = document.createElement("tr");
-            const headerCell1 = document.createElement("th");
-            headerCell1.textContent = "Coupon Code  ";
-            const headerCell2 = document.createElement("th");
-            headerCell2.textContent = "Description";
+  // Create table element
+  const table = document.createElement("table");
+  const headerRow = document.createElement("tr");
+  const headerCell1 = document.createElement("th");
+  headerCell1.textContent = "Coupon Code  ";
+  const headerCell2 = document.createElement("th");
+  headerCell2.textContent = "Description";
 
-            headerRow.appendChild(headerCell1);
-            headerRow.appendChild(headerCell2);
-            table.appendChild(headerRow);
+  headerRow.appendChild(headerCell1);
+  headerRow.appendChild(headerCell2);
+  table.appendChild(headerRow);
 
-            // Populate the table with coupon data
-            coupons.forEach(coupon => {
-                const row = document.createElement("tr");
-                const couponCell = document.createElement("td");
-                couponCell.textContent = coupon.code; // Access coupon code
-                const descriptionCell = document.createElement("td");
-                descriptionCell.textContent = coupon.description; // Access description
+  // Populate the table with coupon data
+  coupons.forEach((coupon) => {
+    const row = document.createElement("tr");
+    const couponCell = document.createElement("td");
+    couponCell.textContent = coupon.code; // Access coupon code
+    const descriptionCell = document.createElement("td");
+    descriptionCell.textContent = coupon.description; // Access description
 
-                row.appendChild(couponCell);
-                row.appendChild(descriptionCell);
-                table.appendChild(row);
-            });
+    row.appendChild(couponCell);
+    row.appendChild(descriptionCell);
+    table.appendChild(row);
+  });
 
-            couponTable.appendChild(table);
-            document.body.appendChild(couponTable);
+  couponTable.appendChild(table);
+  document.body.appendChild(couponTable);
 
-            // Optional: Add close button to remove table
-            const closeButton = document.createElement("button");
-            closeButton.innerText = "Close";
-            closeButton.style.marginTop = "10px";
-            closeButton.onclick = function () {
-                document.body.removeChild(couponTable);
-            };
-            couponTable.appendChild(closeButton);
-        }
-
-
-
+  // Optional: Add close button to remove table
+  const closeButton = document.createElement("button");
+  closeButton.innerText = "Close";
+  closeButton.style.marginTop = "10px";
+  closeButton.onclick = function () {
+    document.body.removeChild(couponTable);
+  };
+  couponTable.appendChild(closeButton);
+}
 
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "parseSearchResults") {
-        //console.log(`what is to be parsedresults:  ${request.html}`);
-        const coupons = extractGoogleResults(request.html);
-        console.log(`where we parse search results in contenscript results:\n  ${coupons}`);
-        sendResponse({ success: true, coupons: coupons });
-    }
-  });
-  
+  if (request.action === "parseSearchResults") {
+    //console.log(`what is to be parsedresults:  ${request.html}`);
+    const coupons = extractGoogleResults(request.html);
+    console.log(
+      `where we parse search results in contenscript results:\n  ${coupons}`
+    );
+    sendResponse({ success: true, coupons: coupons });
+  }
+});
+
 // Extract text from Google results
 function extractGoogleResults(html) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
 
-    const searchResults = [];
-    const elements = doc.querySelectorAll('div.g'); // Select Google search result elements
+  const searchResults = [];
+  const elements = doc.querySelectorAll("div.g"); // Select Google search result elements
 
-    elements.forEach(element => {
-        const snippet = element.innerText; // Get the inner text of each result
-        if (snippet) {
-            searchResults.push(snippet); // Add the snippet to the results array
-        }
-    });
+  elements.forEach((element) => {
+    const snippet = element.innerText; // Get the inner text of each result
+    if (snippet) {
+      searchResults.push(snippet); // Add the snippet to the results array
+    }
+  });
 
-    return searchResults; // Return an array of snippets
+  return searchResults; // Return an array of snippets
 }
-

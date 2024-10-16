@@ -1,29 +1,19 @@
 {
-    "manifest_version": 3,
-    "name": "AutoCoupon Finder",
-    "version": "1.0",
-    "permissions": [
-      "activeTab",    
-      "storage",   
-      "notifications",
-      "scripting",    
-      "tabs"
-    ],
-    "host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ],
-    "background": {
-      "service_worker": "background.js"
-    },
-    "action": {
-      "default_popup": "popup.html"
-    },
-    "content_scripts": [
-      {
-        "matches": ["http://*/*", "https://*/*"],
-        "js": ["contentScript.js"] 
-      }
-    ]
-  }
-  
+  "manifest_version": 3,
+  "name": "AutoCoupon Finder",
+  "version": "1.0",
+  "permissions": ["activeTab", "storage", "notifications", "scripting", "tabs"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["contentScript.js"]
+    }
+  ]
+}
